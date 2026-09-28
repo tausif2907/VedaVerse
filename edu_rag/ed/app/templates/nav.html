@@ -1,0 +1,53 @@
+<link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+<style>
+    nav {
+        background-color: #F97316; 
+        color: #FFFFFF;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: center; 
+        align-items: center;
+        font-size: 18px;
+        margin-bottom: 50px;
+        width: 100%; 
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.6); 
+        position: sticky; 
+        top: 0; 
+        z-index: 1000; 
+    }
+
+    nav a {
+        color: #FFFFFF;
+        background-color: #F97316;
+        font-size: 15px;
+        font-weight: bold;
+        text-decoration: none;
+        margin: 0 15px; 
+        font-weight: bold;
+        transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+    }
+    nav a:hover {
+    box-shadow: 0 0 10px orange, 0 0 15px orange; /* Change glow color to green */
+    transform: scale(1.1);
+}
+
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Poppins', sans-serif;
+        background-color: #FEE6C8;
+        color: #F97316;
+        overflow-x: hidden;
+    }
+</style>
+
+<body>
+    <nav>
+        <div>
+            <a href="{% url 'home' %}">VedaVerse</a>
+            <a href="{% url 'upload_pdf' %}">Upload PDF</a>
+            <a href="{% url 'pdf_list' %}">Anon AI</a>
+            <a href="{% url 'open_sketchbook' %}">Sketch AI</a>
+            <a href="{% url 'flowchart' %}">Workflow AI</a>
+        </div>
+    </nav>

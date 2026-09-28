@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ask a Question</title>
+    <style>
+        body{
+            text-align: center;
+            margin: auto;
+        }
+         h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: black;
+            font-weight: bolder;
+        }
+        h2 {
+            color: black; 
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        form {
+            margin-bottom: 20px;
+            background-color:white; 
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); 
+            width: 500px;
+            height: 100px;
+            text-align: center;
+            margin: auto;
+            margin-top: 50px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: none;
+            background-color:white;
+            color: black;
+            outline: none;
+            
+        }
+
+        button {
+        width: 100px;
+        padding: 10px;
+        background: white;
+        color: black;
+        border: 2px solid gray;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 10px;
+        margin-right: 20px;
+        transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+        
+      }
+      button:hover {
+        transform: scale(1.1);
+        color: white;
+        background: #F97316;
+        border: 2px solid #F97316;
+        box-shadow: 0 0 5px orange, 0 0 5px orange;
+      }
+
+        audio {
+            display: block;
+            margin-top: 20px;
+        }
+
+        a {
+            color: #03dac6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+        .answer{
+            width:800px;
+            background-color: white;
+            margin: auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); 
+            margin-bottom: 30px;
+        }
+        h3{
+            color: black;
+        }
+        .video-container {
+            margin-top: 20px;
+        }
+        .video-card {
+            margin: 10px;
+            display: inline-block;
+            text-align: center;
+        }
+        .video-card img {
+            width: 200px;
+            height: 120px;
+        }
+        .video-card h4 {
+            font-size: 16px;
+            color: #555;
+        }
+        .video-card a {
+            text-decoration: none;
+            color: #03dac6;
+        }
+        .video-card a:hover {
+            text-decoration: underline;
+        }
+        .ytimg{
+            width: 400px;
+            height: 200px;
+        }
+        .no-bullets{
+        list-style-type: none;
+        }
+
+    </style>
+</head>
+<body>
+    {% include 'nav.html' %}
+
+    <h1>Anon AI Answers from PDF - {{ pdf.title }}</h1>
+
+    <form method="POST" action="{% url 'ask_question' pdf.id %}">
+        {% csrf_token %}
+        <input
+            type="text"
+            id="query-input"
+            name="query"
+            placeholder="Type your question here..."
+            value="{{ query }}"
+        />
+        <button type="submit">Submit</button>
+    </form>
+    
+    <div class="chat-input">
+        <button id="voice-input">English</button>
+        <button id="voice-input-kn">Kannada </button>
+        <button id="voice-input-HI">Hindi</button>
+    </div>
+    
+    <div class="chatbox" id="chatbox">
+        
+    </div>
+    
+    <script>
+        const csrfToken = "{{ csrf_token }}";
+        const queryInput = document.getElementById("query-input");
+        const chatbox = document.getElementById("chatbox");
+    
+        document.getElementById("voice-input").addEventListener("click", function () {
+            handleVoiceInput("/process-voice/");
+        });
+    
+        document.getElementById("voice-input-kn").addEventListener("click", function () {
+            handleVoiceInput("/process-voice_kn/");
+        });
+    
+        document.getElementById("voice-input-HI").addEventListener("click", function () {
+            handleVoiceInput("/process-voice_HI/");
+        });
+    
+        function handleVoiceInput(url) {
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                },
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.text) {
+                    queryInput.value = data.text;
+                } else if (data.error) {
+                    const error = document.createElement("div");
+                    error.textContent = `Error: ${data.error}`;
+                    error.style.color = "red";
+                    chatbox.appendChild(error);
+                }
+            })
+            .catch((error) => {
+                const errorMessage = document.createElement("div");
+                errorMessage.textContent = `Error: ${error.message}`;
+                errorMessage.style.color = "red";
+                chatbox.appendChild(errorMessage);
+            });
+        }
+    </script>
+    
+    {% if result %}
+    
+        <h3>Answer:</h3>
+        <div class="answer">
+        <h3>{{ result }}</h3>
+    {% endif %}
+    </div>
+    {% if topic %}
+    <h3>Recommended Videos on {{ topic }}</h3>
+   
+    <ul class="no-bullets">
+      {% for video in videos %}
+      <li>
+        <h4><a href="{{ video.url }}" target="_blank">{{ video.title }}</a></h4>
+        <img src="{{ video.thumbnail }}" alt="{{ video.title }}" class="ytimg" />
+      </li>
+  
+      {% endfor %}
+      {% endif %}
+    </ul>
+</body>
+</html>

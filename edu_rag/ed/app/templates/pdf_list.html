@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uploaded PDFs</title>
+    <style>
+ 
+        body {
+            
+            text-align: center;
+        }
+        h2 {
+            font-size: 28px;
+            color: black; /* Purple for headers */
+            margin-bottom: 20px;
+            font-weight:bolder;
+        }
+
+        /* PDF List Styling */
+        ul {
+            list-style: none;
+            padding: 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        li {
+            background-color: #1e1e1e; /* Slightly lighter dark background for items */
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+            transition: transform 0.2s, background-color 0.3s;
+        }
+
+        li:hover {
+            background-color: black;
+            transform: scale(1.02);
+        }
+
+        /* Link Styles */
+        li a {
+            text-decoration: none;
+            color: white; /* Light purple for links */
+            font-size: 18px;
+            font-weight: bold;
+            flex-grow: 1;
+            margin-right: 10px;
+            transition: color 0.3s ease;
+        }
+
+        li a:hover {
+            color: gray;
+        }
+
+        .download-button {
+        width: 40px;
+        padding: 10px;
+        background: white;
+        color: #F97316;
+        border: 2px solid gray;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .download-button:hover {
+        background: #F97316;
+        border: 2px solid #F97316;
+      }
+        h3, h1 {
+            color: black;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    {% include 'nav.html' %}
+    {% load static %}
+
+    <!-- PDF List Header -->
+    <h2>Uploaded PDFs</h2>
+    <ul id="pdf-list">
+        {% for pdf in pdfs %}
+            <li>
+                <a href="{% url 'ask_question' pdf.id %}">{{ pdf.title }}</a>
+                <a href="{% url 'quiz_view' pdf.id %}">Quiz </a>
+                <a href="{{ pdf.file.url }}" class="download-button" download="{{ pdf.title }}">Download</a>
+                <a href="{% url 'text_to_speech' pdf.id %}">AudioBook </a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Audio Section -->
+    <h1>Listen to Audios:</h1>
+    <h3>History Audio</h3>
+    <audio controls>
+        <source src="{% static 'history.mp3' %}" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <br>
+    <h3>Hitler Biography Audio</h3>
+    <audio controls>
+        <source src="{% static 'two.mp3' %}" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <br>
+    <h3>WHO</h3>
+    <audio controls>
+        <source src="{% static 'who.mp3' %}" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- JavaScript for Audio Synthesis -->
+    <script>
+        function readPDFTitles() {
+            const pdfList = document.getElementById('pdf-list');
+            const pdfItems = pdfList.getElementsByTagName('li');
+            let titles = 'Welcome to the Uploaded PDFs page. Here are your documents: ';
+
+            for (let item of pdfItems) {
+                titles += item.innerText + '. ';
+            }
+
+            const speech = new SpeechSynthesisUtterance(titles);
+            speech.lang = 'en-US';
+            //window.speechSynthesis.speak(speech);
+        }
+
+        // Invoke the function to read the titles when the page loads
+        window.onload = function() {
+            readPDFTitles();
+        };
+    </script>
+ 
+</body>
+</html>

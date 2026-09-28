@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Workflow AI</title>
+    <style>
+      body {
+        text-align: center;
+        margin: auto;
+        font-family: Arial, sans-serif;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: black;
+        font-weight: bolder;
+      }
+      h3{
+        color: black;
+      }
+
+      form {
+        margin-bottom: 20px;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        width: 500px;
+        text-align: center;
+        margin: auto;
+        margin-top: 50px;
+      }
+
+      input[type="text"] {
+        padding: 10px;
+        font-size: 16px;
+        width: 100%;
+        max-width: 600px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        border: none;
+        background-color: white;
+        color: black;
+        outline: none;
+      }
+
+      button {
+        width: 100px;
+        padding: 10px;
+        background: white;
+        color: black;
+        border: 2px solid gray;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 10px;
+        transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+      }
+
+      button:hover {
+        color: white;
+        background: #f97316;
+        border: 2px solid #f97316;
+        transform: scale(1.1);
+        box-shadow: 0 0 5px orange, 0 0 5px orange;
+      }
+
+      .flowchart {
+        width:800px;
+            background-color: white;
+            margin: auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+      }
+
+      .box {
+        background-color: white;
+        color: black;
+        border: 2px solid gray;
+        padding: 10px 20px;
+        border-radius: 4px;
+        text-align: center;
+        margin:auto;
+        width: fit-content;
+        max-width: 100%;
+        word-wrap: break-word;
+      }
+
+      .chat-input {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .chat-input button {
+        width: auto;
+        padding: 10px 20px;
+        font-size: 14px;
+        margin-bottom: 20px;
+      }
+
+      svg {
+        margin: 10px 0;
+      }
+    </style>
+  </head>
+  <body>
+    {% include 'nav.html' %}
+
+    <h1>WORKFLOW AI</h1>
+
+    <form id="flowchart-form">
+        <input type="text" id="project-name" placeholder="Enter project name" required />
+        <button type="submit">Generate</button>
+    </form>
+
+    <div class="chat-input">
+        <button id="voice-input">English</button>
+        <button id="voice-input-kn">Kannada</button>
+        <button id="voice-input-hi">Hindi</button>
+    </div>
+
+    <div id="flowchart-container" class="flowchart"></div>
+
+    <h3 id="video-header">Recommended Videos on {{ topic }}</h3>
+
+    <ul id="video-list" class="no-bullets">
+        <!-- Videos will be dynamically added here -->
+    </ul>
+
+    <script>
+        document.getElementById("flowchart-form").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const projectName = document.getElementById("project-name").value;
+
+            const flowchartContainer = document.getElementById("flowchart-container");
+            const videoList = document.getElementById("video-list");
+            const videoHeader = document.getElementById("video-header");
+
+            // Clear previous content
+            flowchartContainer.innerHTML = "";
+            videoList.innerHTML = "";
+            videoHeader.textContent = `Recommended Videos on ${projectName}`;
+
+            try {
+                const response = await fetch(`/flowchart/generate/${projectName}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Display flowchart data
+                if (data.flowchart) {
+                    const steps = data.flowchart.split("\n").filter((step) => step.trim() !== "");
+                    steps.forEach((step, index) => {
+                        const box = document.createElement("div");
+                        box.className = "box";
+                        box.textContent = step;
+                        flowchartContainer.appendChild(box);
+
+                        if (index < steps.length - 1) {
+                            flowchartContainer.innerHTML += `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1"/>
+                            </svg>`;
+                        }
+                    });
+                } else {
+                    flowchartContainer.innerHTML = "<p>No steps found.</p>";
+                }
+
+                // Display videos
+                if (data.videos && data.videos.length > 0) {
+                    data.videos.forEach((video) => {
+                        const listItem = document.createElement("li");
+                        listItem.innerHTML = `
+                            <h4><a href="${video.url}" target="_blank">${video.title}</a></h4>
+                            <img src="${video.thumbnail}" alt="${video.title}" class="ytimg" />
+                        `;
+                        videoList.appendChild(listItem);
+                    });
+                } else {
+                    videoList.innerHTML = "<p>No videos found.</p>";
+                }
+            } catch (error) {
+                console.error(`Error fetching data: ${error.message}`);
+                flowchartContainer.innerHTML = `<p>Error fetching data: ${error.message}</p>`;
+                videoList.innerHTML = "<p>Error fetching videos.</p>";
+            }
+        });
+
+        const csrfToken = "{{ csrf_token }}";
+        const queryInput = document.getElementById("project-name");
+
+        document.getElementById("voice-input").addEventListener("click", function () {
+            handleVoiceInput("/process-voice/");
+        });
+
+        document.getElementById("voice-input-kn").addEventListener("click", function () {
+            handleVoiceInput("/process-voice_kn/");
+        });
+
+        document.getElementById("voice-input-hi").addEventListener("click", function () {
+            handleVoiceInput("/process-voice_HI/");
+        });
+
+        function handleVoiceInput(url) {
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                },
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.text) {
+                    queryInput.value = data.text;
+                } else if (data.error) {
+                    console.error(`Error: ${data.error}`);
+                }
+            })
+            .catch((error) => {
+                console.error(`Error: ${error.message}`);
+            });
+        }
+    </script>
+  </body>
+</html>

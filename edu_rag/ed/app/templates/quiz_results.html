@@ -1,0 +1,76 @@
+<!-- templates/quiz_results.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Results</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff; /* White background */
+    color: #000000; /* Black text */
+    text-align: center;
+    padding: 20px;
+}
+
+.result {
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #f9f9f9; /* Light gray background */
+    color: #000000; /* Black text */
+    padding: 20px;
+    border-radius: 8px; /* Rounded edges */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.feedback {
+    margin: 20px auto;
+    background-color: #f9f9f9; /* Light gray background */
+    color: #000000; /* Black text */
+    padding: 15px;
+    border-radius: 8px; /* Rounded edges */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+h1{
+    color: black;
+}
+h2{
+    color: black;
+}
+.container {
+        max-width: 800px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      .no-bullets{
+        list-style-type: none;
+      }
+      a{
+        font-weight: bold;
+        color: black;
+      }
+    </style>
+</head>
+<body>
+    {% include 'nav.html' %}
+    <h1>Quiz Results</h1>
+    <h2>Your Score: {{ score }} out of {{ total }}</h2>
+    <div class="container">
+
+    <ul class="no-bullets">
+        {% for question, user_answer, feedback in zipped_data %}
+            <li>
+                <strong>{{ question }}</strong><br>
+                Your answer: {{ user_answer }} - {{ feedback }}<br><br><br>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+    <a href="{% url 'quiz_view' pdf_id=pdf_id %}">Try Again</a>
+</body>
+</html>

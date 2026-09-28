@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sketchbook Opened</title>
+    <style>
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        h3 {
+            margin-top: 60px;
+            color: black;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        p {
+            font-size: 18px;
+            color: #333;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        button {
+            width: 100px;
+        padding: 10px;
+        background: white;
+        color: black;
+        border: 2px solid gray;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 10px;
+        margin-right: 20px;
+        transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+        color: white;
+        background: #F97316;
+        border: 2px solid #F97316;
+        box-shadow: 0 0 5px orange, 0 0 5px orange;
+        }
+        .answer{
+            width: 800px;
+            background-color: white;
+            border-radius: 8px;
+            text-align: center;
+            margin: auto;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    {% include 'nav.html' %}
+    <div class="container">
+        <h1>Sketchbook Application Opened</h1>
+        <p>The Sketchbook has been launched successfully on the server.</p>
+        <form action="{% url 'upload_screenshot' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Result</button>
+        </form>
+    </div>
+
+    <h3>OCR Extraction Result</h3>
+
+    <div class="answer">
+        {% for item in text_list %}
+            <p class="text-item">{{ item }}</p>
+        {% endfor %}
+    </div>
+</body>
+</html>

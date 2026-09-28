@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Screenshot OCR Result</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #e1e1e1;
+            text-align: center;
+            padding: 40px;
+            margin: 0;
+        }
+
+        /* Header Styling */
+        h1 {
+            font-size: 36px;
+            color: #d68eff;
+            text-shadow: 0 0 8px rgba(214, 142, 255, 0.8);
+        }
+
+        /* Content Styling */
+        .result-container {
+            max-width: 800px;
+            margin: 20px auto;
+            line-height: 1.8;
+        }
+
+        .sentence {
+            display: block;
+            margin: 15px 0;
+            font-size: 18px;
+            color: #cfcfcf;
+        }
+
+        /* Button Styling */
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            font-size: 18px;
+            color: #121212;
+            background-color: #d68eff;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 0 10px rgba(214, 142, 255, 0.6);
+        }
+        .button:hover {
+            background-color: #a875ff;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    {% include 'nav.html' %}
+    <h1>Screenshot OCR Result</h1>
+    
+    <div class="result-container">
+        {% for sentence in sentences %}
+            <span class="sentence">{{ sentence }}.</span>
+        {% endfor %}
+    </div>
+
+    <a class="button" href="{% url 'home' %}">Back to Home</a>
+</body>
+</html>

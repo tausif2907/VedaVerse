@@ -1,0 +1,7 @@
+Django
+openai
+langchain
+chromadb
+pyttsx3>=2.90
+SpeechRecognition>=3.8.1
+selenium

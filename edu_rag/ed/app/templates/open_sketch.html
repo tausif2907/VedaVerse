@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Open Sketchbook</title>
+</head>
+<body>
+    <h1>Open the Sketchbook Application</h1>
+    <form action="{% url 'open_sketchbook' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Open Sketchbook</button>
+    </form>
+</body>
+</html>
