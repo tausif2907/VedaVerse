@@ -194,7 +194,3 @@ python main.py     # Opens YouTube through Edge WebDriver
 ## 🤝 Contributing
 
 Contributions are welcome. Fork the repo, create a feature branch, and open a pull request.
-
-## 📜 License
-
-No license has been specified yet. Add a `LICENSE` file to define how others may use this project.
