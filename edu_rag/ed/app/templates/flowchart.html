@@ -149,7 +149,7 @@
             videoHeader.textContent = `Recommended Videos on ${projectName}`;
 
             try {
-                const response = await fetch(`/flowchart/generate/${projectName}`);
+                const response = await fetch(`/flowchart/generate/${encodeURIComponent(projectName)}/`);
                 const data = await response.json();
 
                 if (data.error) {

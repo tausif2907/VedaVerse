@@ -1,6 +1,30 @@
+# Virtual environments
 env/
+venv/
+.venv/
+edu_rag/venv/
+
+# Secrets
 .env
+
+# Python
 __pycache__/
 *.pyc
+
+# IDE
 .idea/
 .vscode/
+
+# Django local data
+db.sqlite3
+staticfiles/
+
+# User uploads & generated files
+edu_rag/ed/media/
+edu_rag/ed/persistent_embeddings/
+edu_rag/ed/app/Folder_with_Frames/
+Folder_with_Frames/
+sketch_screenshot.png
+
+# Binaries (download msedgedriver.exe yourself)
+*.exe

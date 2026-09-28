@@ -10,23 +10,29 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load API keys and secrets from the .env file at the repository root.
+from dotenv import load_dotenv
+load_dotenv(BASE_DIR.parent.parent / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-97%uj)u(w-oriodulm*co!-+e@#$_fxap0!$zu6dxu!ma(=+)g'
+# Set DJANGO_SECRET_KEY in the environment; the fallback is only for local development.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-local-dev-only-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = []
-import os
+ALLOWED_HOSTS = [h for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if h]
+
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY', '')
 
@@ -118,15 +124,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-import os
-
-# Static files (CSS, JavaScript, images)
 STATIC_URL = '/static/'
 
 # Add this only if you have custom static files you want to serve
@@ -140,3 +137,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Media files (Uploaded PDFs, images, etc.)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

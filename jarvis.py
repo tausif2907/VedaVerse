@@ -10,6 +10,17 @@ from requests import get
 import pyjokes
 import smtplib  # Fixed import for smtplib
 #from google.cloud import speech
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Personal settings are read from the environment so no credentials live in the code.
+EMAIL_ADDRESS = os.environ.get("JARVIS_EMAIL", "")
+EMAIL_PASSWORD = os.environ.get("JARVIS_EMAIL_PASSWORD", "")  # Use a Gmail App Password
+EMAIL_RECIPIENT = os.environ.get("JARVIS_EMAIL_TO", "")
+WHATSAPP_NUMBER = os.environ.get("JARVIS_WHATSAPP_TO", "")  # e.g. +91XXXXXXXXXX
+NOTEPAD_PATH = os.environ.get("JARVIS_NOTEPAD_PATH", "notepad.exe")
+MOVIE_PATH = os.environ.get("JARVIS_MOVIE_PATH", "")
 
 # Initialize the text-to-speech engine
 engine = pyttsx3.init('sapi5')
@@ -50,8 +61,8 @@ def send_email(to, content):
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.ehlo()
     server.starttls()
-    server.login('saivibhin4321@gmail.com', 'vibhin')  # Consider using environment variables for security
-    server.sendmail('saivibhin4321@gmail.com', to, content)
+    server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+    server.sendmail(EMAIL_ADDRESS, to, content)
     server.close()
 
 if __name__ == "__main__":
@@ -63,16 +74,17 @@ if __name__ == "__main__":
         if "hello jarvis" in query:
             speak("Hello sir")
         elif "open notepad" in query:
-            npath = "C:\\Users\\saivi\\Desktop\\Notepad.txt"
-            os.startfile(npath)
+            os.startfile(NOTEPAD_PATH)
         elif "open chrome" in query:
             wpath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
             os.startfile(wpath)
         elif "open command prompt" in query:
             os.system("start cmd")
         elif "play movie" in query:
-            mmc = "E:\\folder\\28aug\\salar.mkv"
-            os.startfile(mmc)
+            if MOVIE_PATH:
+                os.startfile(MOVIE_PATH)
+            else:
+                speak("No movie path is configured.")
         elif "ip address" in query:
             ip = get('http://api.ipify.org').text
             speak(f"Your IP address is {ip}")
@@ -81,7 +93,10 @@ if __name__ == "__main__":
         elif "open instagram" in query:
             webbrowser.open("https://www.instagram.com")
         elif "send message" in query:
-            kit.sendwhatmsg("+919535349517", "hi", 1, 1)
+            if WHATSAPP_NUMBER:
+                kit.sendwhatmsg_instantly(WHATSAPP_NUMBER, "hi")
+            else:
+                speak("No WhatsApp number is configured.")
         elif "wikipedia" in query:
             speak("Searching Wikipedia...")
             query = query.replace("wikipedia", "")
@@ -99,12 +114,11 @@ if __name__ == "__main__":
         elif "tell a joke" in query:
             joke = pyjokes.get_joke()
             speak(joke)
-        elif "email to varun" in query:
+        elif "send email" in query:
             try:
                 speak("What should I say?")
                 content = take_command().lower()
-                to = "vam22ainds@cmrit.ac.in"
-                send_email(to, content)
+                send_email(EMAIL_RECIPIENT, content)
                 speak("Email sent.")
             except Exception as e:
                 print(e)

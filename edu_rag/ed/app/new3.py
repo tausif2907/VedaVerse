@@ -1,7 +1,7 @@
 import webbrowser
 import wikipedia
 import pyttsx3
-#import speech_recognition as sr
+import speech_recognition as sr
 import datetime
 import os
 import pywhatkit as kit

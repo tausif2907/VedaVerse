@@ -19,14 +19,11 @@ from django.shortcuts import get_object_or_404, redirect
 from .models import PDFDocument  
 from PyPDF2 import PdfReader  
 from django.core.files.storage import FileSystemStorage
-from .new3 import takecommand
 import random
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-import openai
 # Ensure your OpenAI API key is set via environment variable OPENAI_API_KEY
-from .utils import get_topic_from_user_input, get_youtube_videos_by_topic
-#takecommand()
+from .utils import get_openai_client, get_topic_from_user_input, get_youtube_videos_by_topic
 def home(request):
     #takecommand()
     return render(request,'intro.html')
@@ -100,12 +97,10 @@ def ask_question(request, pdf_id):
         query = request.POST.get('query')
     
         topic = get_topic_from_user_input(query)
-        
-        if topic:
-            videos = get_youtube_videos_by_topic(topic)
+        videos = get_youtube_videos_by_topic(topic) if topic else []
 
         try:
-            language = detect(query)  
+            language = detect(query)
         except Exception as e:
             return render(request, 'ask_question.html', {
                 'pdf': pdf,
@@ -128,7 +123,7 @@ def ask_question(request, pdf_id):
 
         if 'convert_to_speech' in request.POST:
             try:
-                audio_file_name = convert_pdf_to_speech(pdf_path, pdf.title)  
+                audio_file_name = convert_pdf_to_speech_function(pdf_path, pdf.title)
                 pdf.audio_file = f'audio/{audio_file_name}'  
                 pdf.save()  
                 audio_file = pdf.audio_file.name  
@@ -266,7 +261,7 @@ def extract_text_from_image(sample_file, prompt):
 def upload_screenshot_view(request):
     if request.method == 'POST':
         sample_file=prep_image('sketch_screenshot.png')
-        text = extract_text_from_image(sample_file, "Analyze handwritten equations or problems in mathematics, physics, or chemistry. Accurately extract the content and solve them step by step, providing concise and clear explanations for each step. Focus on correctness and clarity, avoiding unnecessary details. For context-specific equations, provide appropriate units and references. Below are examples for guidance:---**Mathematics Example:**Equation: 2 𝑥 + 3 = 11 2x+3=11Solution:1.Subtract3frombothsides: 2 𝑥 = 8 2x=82.Divideby2: 𝑥 = 4 x=4Example2:Solve \intx 2 𝑑 𝑥 \intx 2 dx.Solution:1.Applythepowerrule: 𝑥 𝑛 + 1 𝑛 + 1 + 𝐶 n+1 x n+1 ​ +C.2.Result: 𝑥 3 3 + 𝐶 3 x 3 ​ +C.---**Physics Example:**Problem:Acaracceleratesuniformlyfromresttoavelocityof 20 m/s 20m/sin 5 seconds 5seconds.Findtheacceleration.Solution:1.Usetheformula 𝑣 = 𝑢 + 𝑎 𝑡 v=u+at.2.Rearrangetofind 𝑎 = 𝑣 − 𝑢 𝑡 a= t v−u ​ .3.Substituting: 𝑎 = 20 − 0 5 = 4 m/s 2 a= 5 20−0 ​ =4m/s 2 .Example2:Calculatethekineticenergyofa 2 kg 2kgobjectmovingat 3 m/s 3m/s.Solution:1.Use 𝐾 𝐸 = 1 2 𝑚 𝑣 2 KE= 2 1 ​ mv 2 .2.Substituting: 𝐾 𝐸 = 1 2 × 2 × 3 2 = 9 J KE= 2 1 ​ ×2×3 2 =9J.---**Chemistry Example:**Problem:Calculatethenumberofmolesin 44 g 44gof 𝐶 𝑂 2 CO 2 ​ (Molarmass = 44 g/mol =44g/mol).Solution:1.Use 𝑛 = 𝑚 𝑀 n= M m ​ .2.Substituting: 𝑛 = 44 44 = 1 mol n= 44 44 ​ =1mol.Example2:Balancetheequation: 𝐻 2 + 𝑂 2 \rightarrowH 2 𝑂 H 2 ​ +O 2 ​ \rightarrowH 2 ​ O.Solution:1.Balance 𝐻 2 H 2 ​ : 2 𝐻 2 + 𝑂 2 → 2 𝐻 2 𝑂 2H 2 ​ +O 2 ​ →2H 2 ​ O.---Byprovidingthisstructuredpromptwithexamples,theAIwillbetterunderstandhowtoextractandsolvehandwrittenequationsinthesesubjects,focusingonclarity,accuracy,andsteps.")
+        text = extract_text_from_image(sample_file, r"Analyze handwritten equations or problems in mathematics, physics, or chemistry. Accurately extract the content and solve them step by step, providing concise and clear explanations for each step. Focus on correctness and clarity, avoiding unnecessary details. For context-specific equations, provide appropriate units and references. Below are examples for guidance:---**Mathematics Example:**Equation: 2 𝑥 + 3 = 11 2x+3=11Solution:1.Subtract3frombothsides: 2 𝑥 = 8 2x=82.Divideby2: 𝑥 = 4 x=4Example2:Solve \intx 2 𝑑 𝑥 \intx 2 dx.Solution:1.Applythepowerrule: 𝑥 𝑛 + 1 𝑛 + 1 + 𝐶 n+1 x n+1 ​ +C.2.Result: 𝑥 3 3 + 𝐶 3 x 3 ​ +C.---**Physics Example:**Problem:Acaracceleratesuniformlyfromresttoavelocityof 20 m/s 20m/sin 5 seconds 5seconds.Findtheacceleration.Solution:1.Usetheformula 𝑣 = 𝑢 + 𝑎 𝑡 v=u+at.2.Rearrangetofind 𝑎 = 𝑣 − 𝑢 𝑡 a= t v−u ​ .3.Substituting: 𝑎 = 20 − 0 5 = 4 m/s 2 a= 5 20−0 ​ =4m/s 2 .Example2:Calculatethekineticenergyofa 2 kg 2kgobjectmovingat 3 m/s 3m/s.Solution:1.Use 𝐾 𝐸 = 1 2 𝑚 𝑣 2 KE= 2 1 ​ mv 2 .2.Substituting: 𝐾 𝐸 = 1 2 × 2 × 3 2 = 9 J KE= 2 1 ​ ×2×3 2 =9J.---**Chemistry Example:**Problem:Calculatethenumberofmolesin 44 g 44gof 𝐶 𝑂 2 CO 2 ​ (Molarmass = 44 g/mol =44g/mol).Solution:1.Use 𝑛 = 𝑚 𝑀 n= M m ​ .2.Substituting: 𝑛 = 44 44 = 1 mol n= 44 44 ​ =1mol.Example2:Balancetheequation: 𝐻 2 + 𝑂 2 \rightarrowH 2 𝑂 H 2 ​ +O 2 ​ \rightarrowH 2 ​ O.Solution:1.Balance 𝐻 2 H 2 ​ : 2 𝐻 2 + 𝑂 2 → 2 𝐻 2 𝑂 2H 2 ​ +O 2 ​ →2H 2 ​ O.---Byprovidingthisstructuredpromptwithexamples,theAIwillbetterunderstandhowtoextractandsolvehandwrittenequationsinthesesubjects,focusingonclarity,accuracy,andsteps.")
         text_list=text.split(",")
         return render(request, "sketch_opened.html", {'text_list': text_list}) 
 
@@ -397,13 +392,11 @@ def quiz_view(request, pdf_id):
     request.session['mcq']={i:[mcqs[i]['question'],mcqs[i]['correct_answer']] for i in range(len(mcqs))}
 
     return render(request, 'quiz.html', {'mcqs': mcqs})
-videos = []
 def generate_flowchart(request, name):
     project_name = name
-    openai.api_key = os.environ.get('OPENAI_API_KEY', '')
 
     try:
-        response = openai.ChatCompletion.create(
+        response = get_openai_client().chat.completions.create(
             model="gpt-4o",
             messages=[
                 {
@@ -417,26 +410,20 @@ def generate_flowchart(request, name):
             ]
         )
         topic = get_topic_from_user_input(name)
-       
-        
-        if topic:
-            videos = get_youtube_videos_by_topic(topic)
-        
-        flowchart_data = response['choices'][0]['message']['content']
-        print(f"OpenAI Response: {flowchart_data}")  # Debugging
-        print(f"Videos ",videos)
-        if videos:
-            return JsonResponse({
+        videos = get_youtube_videos_by_topic(topic) if topic else []
+
+        flowchart_data = response.choices[0].message.content
+        return JsonResponse({
             "flowchart": flowchart_data,
             "videos": videos
-            }, status=200)
+        }, status=200)
     except Exception as e:
         print(f"Error: {str(e)}")  # Debugging
         return JsonResponse({"error": str(e)}, status=500)
 
 
 def flowchart(request):
-    return render(request,"flowchart.html",{"videos":videos})
+    return render(request, "flowchart.html", {"videos": []})
 import speech_recognition as sr
 
 def process_voice(request):
@@ -506,4 +493,4 @@ def recommend_videos(request):
             videos = get_youtube_videos_by_topic(topic)
             return render(request, 'videos_list.html', {'videos': videos, 'topic': topic})
     
-    return render(request, 'search.html')
+    return render(request, 'youtube_search.html')

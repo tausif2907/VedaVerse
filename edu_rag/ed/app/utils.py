@@ -29,26 +29,27 @@ def generate_mcq_questions(qa):
     rag_response = qa.run("Generate multiple-choice questions with options and indicate the correct answer.")
     formatted_questions = process_mcq_questions(rag_response)
     return formatted_questions
-import openai
+from openai import OpenAI
 from django.conf import settings
 
-# Set OpenAI API key
-openai.api_key = settings.OPENAI_API_KEY
+
+def get_openai_client():
+    return OpenAI(api_key=settings.OPENAI_API_KEY)
+
 
 def get_topic_from_user_input(user_input):
     try:
-        # Use GPT-4 via the chat completions endpoint
-        response = openai.ChatCompletion.create(
-            model="gpt-4",  # Use GPT-4 for more advanced capabilities
+        response = get_openai_client().chat.completions.create(
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": f"Extract the main topic from this input: {user_input}"}
             ],
             max_tokens=60
         )
-        
+
         # Extract the topic from the response
-        topic = response['choices'][0]['message']['content'].strip()
+        topic = response.choices[0].message.content.strip()
         return topic
     except Exception as e:
         print(f"Error processing input with OpenAI: {e}")
@@ -63,6 +64,7 @@ def get_youtube_videos_by_topic(topic):
     request = youtube.search().list(
         q=topic,  # Search term is the extracted topic
         part="snippet",
+        type="video",  # Only videos have an id.videoId
         maxResults=5,  # Limit results to 5 videos
     )
     

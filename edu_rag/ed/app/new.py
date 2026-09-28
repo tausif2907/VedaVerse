@@ -11,6 +11,14 @@ from requests import get
 import pyjokes
 import smtplib
 
+# Personal settings are read from the environment so no credentials live in the code.
+EMAIL_ADDRESS = os.environ.get("JARVIS_EMAIL", "")
+EMAIL_PASSWORD = os.environ.get("JARVIS_EMAIL_PASSWORD", "")  # Use a Gmail App Password
+EMAIL_RECIPIENT = os.environ.get("JARVIS_EMAIL_TO", "")
+WHATSAPP_NUMBER = os.environ.get("JARVIS_WHATSAPP_TO", "")
+NOTEPAD_PATH = os.environ.get("JARVIS_NOTEPAD_PATH", "notepad.exe")
+MOVIE_PATH = os.environ.get("JARVIS_MOVIE_PATH", "")
+
 # Initialize the voice engine
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
@@ -50,24 +58,25 @@ def sendEmail(to, content):
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.ehlo()
     server.starttls()
-    server.login('your_email@gmail.com', 'your_password')
-    server.sendmail('your_email@gmail.com', to, content)
+    server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+    server.sendmail(EMAIL_ADDRESS, to, content)
     server.close()
 
 def jarvis(query):
     if "hello jarvis" in query:
         speak("Hello sir")
     elif "open notepad" in query:
-        npath = "C:\\Users\\saivi\\Desktop\\Notepad.txt"
-        os.startfile(npath)
+        os.startfile(NOTEPAD_PATH)
     elif "open chrome" in query:
         wpath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
         os.startfile(wpath)
     elif "open command prompt" in query:
         os.system("start cmd")
     elif "play movie" in query:
-        mmc = "E:\\folder\\28aug\\salar.mkv"
-        os.startfile(mmc)
+        if MOVIE_PATH:
+            os.startfile(MOVIE_PATH)
+        else:
+            speak("No movie path is configured.")
     elif "ip address" in query:
         ip = get('http://api.ipify.org').text
         speak(f"Your IP address is {ip}")
@@ -76,7 +85,10 @@ def jarvis(query):
     elif "open instagram" in query:
         webbrowser.open("www.instagram.com")
     elif "send message" in query:
-        kit.sendwhatmsg("+919535349517", "hi", 1, 1)
+        if WHATSAPP_NUMBER:
+            kit.sendwhatmsg_instantly(WHATSAPP_NUMBER, "hi")
+        else:
+            speak("No WhatsApp number is configured.")
     elif "wikipedia" in query:
         speak("Searching Wikipedia")
         query = query.replace("wikipedia", "")
@@ -92,12 +104,11 @@ def jarvis(query):
     elif "tell a joke" in query:
         joke = pyjokes.get_joke()
         speak(joke)
-    elif "email to varun" in query:
+    elif "send email" in query:
         try:
             speak("What should I say?")
             content = takecommand().lower()
-            to = "vam22ainds@cmrit.ac.in"
-            sendEmail(to, content)
+            sendEmail(EMAIL_RECIPIENT, content)
             speak("Email sent successfully")
         except Exception as e:
             speak("Sorry, I could not send the email")
@@ -109,6 +120,5 @@ def jarvis(query):
         sys.exit()
     else:
         speak("I can't do that")
-#takecommand()
-quesy=takecommand()
-jarvis(quesy)
+if __name__ == "__main__":
+    jarvis(takecommand())
